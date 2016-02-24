@@ -1,0 +1,37 @@
+# History files
+.Rhistory
+.Rapp.history
+
+# Session Data files
+.RData
+
+# Example code in package build process
+*-Ex.R
+
+# RStudio files
+.Rproj.user/
+*.Rproj
+
+# Build config files
+.Rbuildignore
+
+# produced vignettes
+vignettes/*.html
+vignettes/*.pdf
+
+# OAuth2 token, see https://github.com/hadley/httr/releases/tag/v0.3
+.httr-oauth
+
+# Rcpp automatically generated files
+R/RcppExports.R
+src/RcppExports.cpp
+src/*.o
+
+# Compiled library files
+*.dll
+*.so
+
+# ROXYGEN automatically generated files
+man/*.Rd
+# NAMESPACE
+.Rproj.user
