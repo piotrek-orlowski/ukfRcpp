@@ -32,6 +32,6 @@ src/*.o
 *.so
 
 # ROXYGEN automatically generated files
-man/*.Rd
+# man/*.Rd
 # NAMESPACE
 .Rproj.user
