@@ -1,6 +1,6 @@
 #include <RcppArmadillo.h>
 #include "../inst/include/ukfClass.h"
-#include "unscentedMeanCov.h"
+#include "../inst/include/unscentedMeanCov.h"
 using namespace std;
 
 // Unscented Kalman Filter with additive noise, van der Merwe pp. 108-110. Rather general implementation.
@@ -201,6 +201,7 @@ RCPP_MODULE(ukf){
   .property("logL", &ukfRcpp::getLogL, "Retrieve log-likelihood vector.")
   .property("ukfConst", &ukfRcpp::getUKFconstants, &ukfRcpp::setUKFconstants, "UKF parameters alpha (first) and beta (second) argument/element of returned vector.")
   .method("filterAdditiveNoise", &ukfRcpp::filterAdditiveNoise, "Run filter on the sample.")
+  .method("reinitialiseFilter", &ukfRcpp::reinitialiseFilter, "Reinitialise all containers and counters to at-construction state.")
   
   // Expose fields
   .field( "dataMat", &ukfRcpp::dataMat)

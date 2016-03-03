@@ -1,7 +1,7 @@
 #ifndef UKFCLASS_H
 #define UKFCLASS_H
 #include <RcppArmadillo.h>
-#include "../../src/unscentedMeanCov.h"
+#include "unscentedMeanCov.h"
 #include "ukfRcpp.h"
 using namespace std;
 
@@ -38,6 +38,7 @@ public:
   
   // function that runs a step of the filter
   void filterAdditiveNoise();
+  void reinitialiseFilter();
   
 private:
   // UKF parameters
@@ -66,7 +67,6 @@ private:
   
   // Method to run one step of filter. Stores filtered state and covariance matrix. Updates initProcess and nextProcess variables
   void filterStep();
-  void reinitialiseFilter();
 };
 
 #endif
