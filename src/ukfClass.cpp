@@ -1,6 +1,7 @@
 #include <RcppArmadillo.h>
 #include "../inst/include/ukfClass.h"
 #include "../inst/include/unscentedMeanCov.h"
+#include "cholupdate.h"
 using namespace std;
 
 // Unscented Kalman Filter with additive noise, van der Merwe pp. 108-110. Rather general implementation.
@@ -13,6 +14,11 @@ using namespace std;
     
     nextProcessState = initProcessState;
     nextProcessCov = initProcessCov;
+    
+    // Some state lags might be propagated. In that case the noise variance for those states is 0, and so is the coefficient on the diagonal of the initial proc covariance matrix
+    procCovChol.fill(0.0);
+    arma::uvec diagNotZeros = arma::find(initProcessCov.diag() != 0);
+    procCovChol.submat(diagNotZeros, diagNotZeros) = arma::chol(initProcessCov.submat(diagNotZeros,diagNotZeros), "lower");
     
     transitionParams = modelingParams_["transition"];
     observationParams = modelingParams_["observation"];
@@ -45,6 +51,11 @@ using namespace std;
     
     nextProcessState = initProcessState;
     nextProcessCov = initProcessCov;
+    
+    // Some state lags might be propagated. In that case the noise variance for those states is 0, and so is the coefficient on the diagonal of the initial proc covariance matrix
+    procCovChol.fill(0.0);
+    arma::uvec diagNotZeros = arma::find(initProcessCov.diag() != 0);
+    procCovChol.submat(diagNotZeros, diagNotZeros) = arma::chol(initProcessCov.submat(diagNotZeros,diagNotZeros), "lower");
     
     transitionParams = modelingParams_["transition"];
     observationParams = modelingParams_["observation"];
@@ -105,6 +116,19 @@ using namespace std;
     reinitialiseFilter();
   }
   
+  void ukfClass::filterSqrtAdditiveNoise(){
+    // Reset filter iteration counter to avoid errors.
+    iterationCounter = 0;
+    
+    // Filtering loop
+    for(int runNum = 0; runNum < sampleSize; runNum++){
+      filterSqrtStep();
+    }
+    // logL calculation
+    // Clean up: reinitialise filter starting values
+    reinitialiseFilter();
+  }
+  
 // private: Method to run one step of filter. Stores filtered state and 
 // covariance matrix. Updates initProcess and nextProcess variables. Increments
 // iteration counter.
@@ -113,7 +137,6 @@ using namespace std;
     double gamma = pow(pow(alpha,2.0)*L,0.5);
    
     // Generate a set of sigma points from the initial state
-    arma::mat procCovChol(initProcessCov);
     procCovChol.fill(0.0);
     arma::uvec diagNotZeros = arma::find(initProcessCov.diag() != 0);
 
@@ -194,6 +217,120 @@ using namespace std;
     // Move iteration counter forward
     iterationCounter++;
   }
+  
+  void ukfClass::filterSqrtStep(){
+    
+    // Estabilsh where to expect zero variances, i.e. no noise
+    arma::uvec diagNotZeros = arma::find(initProcessCov.diag() != 0);
+    
+    // Scaling constant for unscented transformation
+    double gamma = pow(pow(alpha,2.0)*L,0.5);
+
+    // Generate sigma points
+    arma::mat stateSigma = generateSigmaPoints(initProcessState, gamma, procCovChol);
+    
+    // Propagate the augmented state through the transition dynamics function
+    Rcpp::List statePrediction = predictState(stateSigma, transitionParams);
+    
+    // Recover augumented propagated state and state noise covariance matrix
+    arma::mat nextStateSigma = Rcpp::as<arma::mat>(statePrediction["stateVec"]);
+    arma::mat procNoiseMat = Rcpp::as<arma::mat>(statePrediction["procNoiseMat"]);
+    procNoiseMat = arma::chol(procNoiseMat);
+    
+    // Generate sigma point weights for the original augmented state
+    arma::mat sigmaWts = generateSigmaWeights(L, alpha, beta);
+    
+    // Calculate the approximation of the average state after non-linear propagation
+    nextProcessState = unscentedMean(nextStateSigma, sigmaWts.col(0));
+    
+    // First part of covariance update in square root form: QR-decomp, but only take the non-zero stuff.
+    arma::mat qrInputBig = nextStateSigma.cols(1,nextStateSigma.n_cols-1);
+    arma::mat qrInputSmall(diagNotZeros.n_elem, qrInputBig.n_cols+diagNotZeros.n_elem,arma::fill::zeros);
+    qrInputSmall.cols(0,qrInputBig.n_cols-1) = qrInputBig.rows(diagNotZeros);
+    qrInputSmall.cols(qrInputBig.n_cols, qrInputSmall.n_cols-1) = procNoiseMat.submat(diagNotZeros,diagNotZeros);
+    for(int kcol=0; kcol < qrInputBig.n_cols; kcol++){
+      qrInputSmall.col(kcol) -= nextProcessState.elem(diagNotZeros);
+      qrInputSmall.col(kcol) *= sqrt(sigmaWts(1,1)); // you have to multiply all elements by the covariance weights with indices greater than one, but these weights are all the same
+    }
+
+    // do the QR part
+    arma::mat qrQ;
+    arma::mat procCovCholSmall = procCovChol.submat(diagNotZeros,diagNotZeros);
+    arma::qr(qrQ,procCovCholSmall,qrInputSmall);
+    
+    // cholupdate
+    arma::uvec zeroInd(1,arma::fill::zeros);
+    procCovCholSmall = cholupdate(procCovCholSmall, nextStateSigma.submat(diagNotZeros,zeroInd) - nextProcessState.elem(diagNotZeros), sigmaWts(0,1));
+    
+    // write into big chol
+    procCovChol.submat(diagNotZeros,diagNotZeros) = procCovCholSmall;
+    
+    // augment and extend state space
+    arma::mat extendedNextStateSigma = generateSigmaPoints(nextStateSigma, gamma, procCovChol);
+    
+    // New unscented transformation weights for bigger state matrix
+    arma::mat extendedSigmaWts = generateSigmaWeights(2*L, alpha, beta);
+    
+    // Calculate the observation mapping at predicted points
+    Rcpp::List observationPredictionList = evaluateState(extendedNextStateSigma, observationParams);
+    
+    // Recover predicted observations and their noise covariance matrix
+    arma::mat observationPrediction = Rcpp::as<arma::mat>(observationPredictionList["yhat"]);
+    arma::mat observationNoise = Rcpp::as<arma::mat>(observationPredictionList["obsNoiseMat"]);
+    observationNoise = arma::chol(observationNoise);
+    
+    // Calculate mean and covariance of observed values via the unscented transformation
+    arma::mat observationMean = unscentedMean(observationPrediction, extendedSigmaWts.col(0));
+    
+    // observation covariance -- qr form
+    arma::mat qrInputObs(observationPrediction.n_rows, observationPrediction.n_cols-1 + observationNoise.n_cols, arma::fill::zeros);
+    qrInputObs.cols(0,observationPrediction.n_cols-2) = observationPrediction.cols(1,observationPrediction.n_cols-1);
+    qrInputObs.cols(observationPrediction.n_cols-1,qrInputObs.n_cols-1) = observationNoise;
+    for(int kcol=0; kcol < observationPrediction.n_cols-1; kcol++){
+      qrInputObs.col(kcol) -= observationMean;
+      qrInputObs.col(kcol) *= sqrt(extendedSigmaWts(1,1)); // you have to multiply all elements by the covariance weights with indices greater than one, but these weights are all the same
+    }
+    
+    // do the QR part
+    arma::mat qrQO;
+    arma::qr(qrQO,observationNoise,qrInputObs);
+    
+    // cholupdate
+    observationNoise = cholupdate(observationNoise, observationPrediction.col(0) - observationMean, extendedSigmaWts(0,1));
+    
+    // Calculate covariance matrix between states and observations
+    arma::mat stateObservationCov = unscentedCrossCov(extendedNextStateSigma, observationPrediction, extendedSigmaWts.col(0), extendedSigmaWts.col(1));
+    
+    // Kalman gain
+    arma::mat kalmanGain = arma::solve(arma::solve(observationNoise.t(),stateObservationCov),observationNoise);
+    
+    // Pick data point from dataset
+    arma::mat dataPoint = dataMat.row(iterationCounter);
+    
+    // Kalman update
+    nextProcessState += kalmanGain * (dataPoint.t() - observationMean);
+    
+    // Store state
+    stateMat.row(iterationCounter+1L) = nextProcessState.t();
+    
+    // new process obs matrix
+    arma::mat UMat = kalmanGain * observationNoise;
+    procCovCholSmall = procCovChol.submat(diagNotZeros, diagNotZeros);
+    for(int kcol = 0; kcol < UMat.n_cols; kcol++){
+      procCovCholSmall = cholupdate(procCovCholSmall, UMat.col(kcol), -1.0);
+    }
+    procCovChol.submat(diagNotZeros, diagNotZeros) = procCovCholSmall;
+    
+    // Store state covariance matrix
+    stateCovCube.slice(iterationCounter+1L) = procCovChol;
+    
+    // Update state and variance containers for the loop.
+    initProcessState = nextProcessState;
+    
+    // Move iteration counter forward
+    iterationCounter++;
+  }
+  
   void ukfClass::reinitialiseFilter(){
     initProcessState = constInitProcessState;
     initProcessCov = constInitProcessCov;

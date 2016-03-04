@@ -9,7 +9,7 @@ using namespace Rcpp;
 //' @param nu real, positive for update, negative for downdate. Mind the square root in description.
 //' @details This follows the definition in van der Merwe PhD Thesis ``Sigma-Point Kalma Filters for Probabilistic Inference in Dynamic State-Space Models''
 //' @export
-// [[Rcpp::interfaces(r,cpp)]]
+// [[Rcpp::export]]
 arma::mat cholupdate(arma::mat RMat, arma::vec xVec, double nu){
   
   double nuSign = (nu > 0) - (nu < 0);
