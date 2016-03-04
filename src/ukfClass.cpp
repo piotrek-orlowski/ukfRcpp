@@ -91,7 +91,7 @@ using namespace std;
     constants(1) = beta;
     return constants;
   }
-  
+    
 // This function calls the whole filter
   void ukfRcpp::filterAdditiveNoise(){
     // Reset filter iteration counter to avoid errors.
@@ -113,7 +113,14 @@ using namespace std;
     double gamma = pow(pow(alpha,2.0)*L,0.5);
    
     // Generate a set of sigma points from the initial state
-    arma::mat stateSigma = generateSigmaPoints(initProcessState, gamma, arma::chol(initProcessCov, "lower"));
+    arma::mat procCovChol(initProcessCov);
+    procCovChol.fill(0.0);
+    arma::uvec diagNotZeros = arma::find(initProcessCov.diag() != 0);
+
+    procCovChol.submat(diagNotZeros, diagNotZeros) = arma::chol(initProcessCov.submat(diagNotZeros,diagNotZeros), "lower");
+    
+    // arma::mat stateSigma = generateSigmaPoints(initProcessState, gamma, arma::chol(initProcessCov, "lower"));
+    arma::mat stateSigma = generateSigmaPoints(initProcessState, gamma, procCovChol);
     
     // Propagate the augmented state through the transition dynamics function
     Rcpp::List statePrediction = predictState(stateSigma, transitionParams);
@@ -136,7 +143,11 @@ using namespace std;
     nextProcessCov += procNoiseMat;
     
     // Further extend the state space, see eq. 3.174 and comment in vdM
-    arma::mat extendedNextStateSigma = generateSigmaPoints(nextStateSigma, gamma, arma::chol(nextProcessCov,"lower"));
+    diagNotZeros = arma::find(nextProcessCov.diag() != 0);
+    procCovChol.fill(0.0);
+    procCovChol.submat(diagNotZeros, diagNotZeros) = arma::chol(nextProcessCov.submat(diagNotZeros,diagNotZeros),"lower");
+    // arma::mat extendedNextStateSigma = generateSigmaPoints(nextStateSigma, gamma, arma::chol(nextProcessCov,"lower"));
+    arma::mat extendedNextStateSigma = generateSigmaPoints(nextStateSigma, gamma, procCovChol);
     
     // New unscented transformation weights for bigger state matrix
     arma::mat extendedSigmaWts = generateSigmaWeights(2*L, alpha, beta);
