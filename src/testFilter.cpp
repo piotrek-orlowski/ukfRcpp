@@ -88,9 +88,9 @@ Rcpp::List testUKFclass(){
   stateHandler transitionPtr = &testTransition;
   stateHandler observationPtr = &testObservation;
   
-  // ukfRcpp myFirstFilter;
+  // ukfClass myFirstFilter;
   
-  ukfRcpp myFirstFilter(observationsMat, initState, initCov, transitionPtr, observationPtr, fakeParameterList);
+  ukfClass myFirstFilter(observationsMat, initState, initCov, transitionPtr, observationPtr, fakeParameterList);
 
   myFirstFilter.filterAdditiveNoise();
 

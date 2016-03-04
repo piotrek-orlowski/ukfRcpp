@@ -6,12 +6,12 @@
 using namespace std;
 
 // Unscented Kalman Filter with additive noise, van der Merwe pp. 108-110. Rather general implementation
-class ukfRcpp {
+class ukfClass {
 public:
   // Constructor for cpp
-  ukfRcpp(arma::mat dataMat_, arma::vec initProcessState_, arma::mat initProcessCov_, stateHandler predictState_, stateHandler evaluateState_, Rcpp::List modelingParams_);
+  ukfClass(arma::mat dataMat_, arma::vec initProcessState_, arma::mat initProcessCov_, stateHandler predictState_, stateHandler evaluateState_, Rcpp::List modelingParams_);
   // Constructor for R
-  ukfRcpp(arma::mat dataMat_, arma::vec initProcessState_, arma::mat initProcessCov_, SEXP predictState_, SEXP evaluateState_, Rcpp::List modelingParams_);
+  ukfClass(arma::mat dataMat_, arma::vec initProcessState_, arma::mat initProcessCov_, SEXP predictState_, SEXP evaluateState_, Rcpp::List modelingParams_);
   // methods:
   // return covariance matrices of filtered states
   arma::cube getCovCube();

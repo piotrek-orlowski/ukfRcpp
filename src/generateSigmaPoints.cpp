@@ -4,7 +4,6 @@ using namespace std;
 
 
 // xMat has as L rows (number of states); PMatChol is LxL. 
-//' @useDynLib divergenceModelR
 //' @export
 // [[Rcpp::export]]
 arma::mat generateSigmaPoints(const arma::mat xMat, const double gam, const arma::mat PMatChol){

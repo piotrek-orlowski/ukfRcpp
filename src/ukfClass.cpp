@@ -7,7 +7,7 @@ using namespace std;
 
 // public:
 // Constructor for cpp
-  ukfRcpp::ukfRcpp(arma::mat dataMat_, arma::vec initProcessState_, arma::mat initProcessCov_, stateHandler predictState_, stateHandler evaluateState_, Rcpp::List modelingParams_) : dataMat(dataMat_), initProcessState(initProcessState_), initProcessCov(initProcessCov_), constInitProcessState(initProcessState_), constInitProcessCov(initProcessCov_) {
+  ukfClass::ukfClass(arma::mat dataMat_, arma::vec initProcessState_, arma::mat initProcessCov_, stateHandler predictState_, stateHandler evaluateState_, Rcpp::List modelingParams_) : dataMat(dataMat_), initProcessState(initProcessState_), initProcessCov(initProcessCov_), constInitProcessState(initProcessState_), constInitProcessCov(initProcessCov_) {
     predictState = predictState_;
     evaluateState = evaluateState_;
     
@@ -32,7 +32,7 @@ using namespace std;
   }
   
 // Constructor for R
-  ukfRcpp::ukfRcpp(arma::mat dataMat_, arma::vec initProcessState_, arma::mat initProcessCov_, SEXP predictState_, SEXP evaluateState_, Rcpp::List modelingParams_) : dataMat(dataMat_), initProcessState(initProcessState_), initProcessCov(initProcessCov_), constInitProcessState(initProcessState_), constInitProcessCov(initProcessCov_) {
+  ukfClass::ukfClass(arma::mat dataMat_, arma::vec initProcessState_, arma::mat initProcessCov_, SEXP predictState_, SEXP evaluateState_, Rcpp::List modelingParams_) : dataMat(dataMat_), initProcessState(initProcessState_), initProcessCov(initProcessCov_), constInitProcessState(initProcessState_), constInitProcessCov(initProcessCov_) {
     
     Rcpp::XPtr<stateHandler> predictStateXptr(predictState_);
     predictState = *predictStateXptr;
@@ -64,28 +64,28 @@ using namespace std;
   
 // methods:
 // return covariance matrices of filtered states
-  arma::cube ukfRcpp::getCovCube(){
+  arma::cube ukfClass::getCovCube(){
     return stateCovCube;
   }
   
 // return filtered states
-  arma::mat ukfRcpp::getStateMat(){
+  arma::mat ukfClass::getStateMat(){
     return stateMat;
   }
   
 // return log-likelihood
-  arma::vec ukfRcpp::getLogL(){
+  arma::vec ukfClass::getLogL(){
     return logL;
   }
   
 // set filtering parameters
-  void ukfRcpp::setUKFconstants(arma::vec alphaBeta){
+  void ukfClass::setUKFconstants(arma::vec alphaBeta){
     alpha = alphaBeta(0);
     beta = alphaBeta(1);
   }
   
 // get filtering parameters
-  arma::vec ukfRcpp::getUKFconstants(){
+  arma::vec ukfClass::getUKFconstants(){
     arma::vec constants(2);
     constants(0) = alpha;
     constants(1) = beta;
@@ -93,7 +93,7 @@ using namespace std;
   }
     
 // This function calls the whole filter
-  void ukfRcpp::filterAdditiveNoise(){
+  void ukfClass::filterAdditiveNoise(){
     // Reset filter iteration counter to avoid errors.
     iterationCounter = 0;
     // Filtering loop
@@ -108,7 +108,7 @@ using namespace std;
 // private: Method to run one step of filter. Stores filtered state and 
 // covariance matrix. Updates initProcess and nextProcess variables. Increments
 // iteration counter.
-  void ukfRcpp::filterStep(){
+  void ukfClass::filterStep(){
     // Scaling constant for unscented transformation
     double gamma = pow(pow(alpha,2.0)*L,0.5);
    
@@ -194,27 +194,27 @@ using namespace std;
     // Move iteration counter forward
     iterationCounter++;
   }
-  void ukfRcpp::reinitialiseFilter(){
+  void ukfClass::reinitialiseFilter(){
     initProcessState = constInitProcessState;
     initProcessCov = constInitProcessCov;
   }
 
 RCPP_MODULE(ukf){
   
-  Rcpp::class_<ukfRcpp>("ukf")
+  Rcpp::class_<ukfClass>("ukf")
   
   // Expose R constructor
   .constructor<arma::mat, arma::vec, arma::mat, SEXP, SEXP, Rcpp::List>()
   
   // Expose methods
-  .property("stateCovCube", &ukfRcpp::getCovCube, "Retrieve state covariance cube.")
-  .property("stateMat", &ukfRcpp::getStateMat, "Retrieve filtered states.")
-  .property("logL", &ukfRcpp::getLogL, "Retrieve log-likelihood vector.")
-  .property("ukfConst", &ukfRcpp::getUKFconstants, &ukfRcpp::setUKFconstants, "UKF parameters alpha (first) and beta (second) argument/element of returned vector.")
-  .method("filterAdditiveNoise", &ukfRcpp::filterAdditiveNoise, "Run filter on the sample.")
-  .method("reinitialiseFilter", &ukfRcpp::reinitialiseFilter, "Reinitialise all containers and counters to at-construction state.")
+  .property("stateCovCube", &ukfClass::getCovCube, "Retrieve state covariance cube.")
+  .property("stateMat", &ukfClass::getStateMat, "Retrieve filtered states.")
+  .property("logL", &ukfClass::getLogL, "Retrieve log-likelihood vector.")
+  .property("ukfConst", &ukfClass::getUKFconstants, &ukfClass::setUKFconstants, "UKF parameters alpha (first) and beta (second) argument/element of returned vector.")
+  .method("filterAdditiveNoise", &ukfClass::filterAdditiveNoise, "Run filter on the sample.")
+  .method("reinitialiseFilter", &ukfClass::reinitialiseFilter, "Reinitialise all containers and counters to at-construction state.")
   
   // Expose fields
-  .field( "dataMat", &ukfRcpp::dataMat)
+  .field( "dataMat", &ukfClass::dataMat)
   ;
 }

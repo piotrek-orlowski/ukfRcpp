@@ -2,6 +2,7 @@
 using namespace std;
 
 //' @export
+//' @useDynLib ukfRcpp
 // [[Rcpp::export]]
 arma::mat unscentedMean(const arma::mat xSigma, const arma::vec unscWts){
 //   xSigma.t().print("unscMean, transpose of xSigma");
