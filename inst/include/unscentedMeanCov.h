@@ -10,7 +10,7 @@ arma::mat unscentedCov(const arma::mat xSigma, const arma::vec unscWtsMean, cons
 
 arma::mat unscentedCrossCov(const arma::mat xSigma, const arma::mat ySigma, const arma::vec unscWtsMean, const arma::vec unscWtsCov);
 
-arma::mat generateSigmaPoints(const arma::mat, double gam, const arma::mat);
+arma::mat generateSigmaPoints(const arma::mat, double gam, const arma::mat, int L);
 
 arma::mat generateSigmaWeights(const int L, const double alpha, const double beta);
 

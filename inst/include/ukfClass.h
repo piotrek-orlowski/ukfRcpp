@@ -38,6 +38,7 @@ public:
   
   // function that runs a step of the filter
   void filterAdditiveNoise();
+  void filterSqrtAdditiveNoise();
   void reinitialiseFilter();
   
 private:
@@ -55,6 +56,7 @@ private:
   arma::vec nextProcessState;
   arma::mat initProcessCov;
   arma::mat nextProcessCov;
+  arma::mat procCovChol;
   
   // storage
   arma::cube stateCovCube;
@@ -67,6 +69,7 @@ private:
   
   // Method to run one step of filter. Stores filtered state and covariance matrix. Updates initProcess and nextProcess variables
   void filterStep();
+  void filterSqrtStep();
 };
 
 #endif
