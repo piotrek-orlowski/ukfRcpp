@@ -9,7 +9,7 @@ PMat[1,2] <- PMat[2,1] <- -0.05
 PMat[2,3] <- PMat[3,2] <- 0.025
 PChol <- t(chol(PMat))
 
-bigX <- generateSigmaPoints(xMat = xMat, gam = gam, PMatChol = PChol)
+bigX <- generateSigmaPoints(xMat = xMat, gam = gam, PMatChol = PChol, L = 3)
 biggerX <- generateSigmaPoints(xMat = bigX, gam = gam, PMatChol = PChol)
 
 xSample <- matrix(rnorm(n = 3*1e5, mean = 0, sd = 1), ncol = 3)

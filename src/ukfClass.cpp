@@ -25,8 +25,8 @@ ukfClass::ukfClass(arma::mat dataMat_, arma::vec initProcessState_, arma::mat in
   observationParams = modelingParams_["observation"];
   
   alpha = 1.0;
-  L = initProcessState.n_elem;
-  // L = diagNotZeros.n_elem;
+  // L = initProcessState.n_elem;
+  L = diagNotZeros.n_elem;
   beta = 2.0;
   
   stateCovCube = arma::zeros<arma::cube>(initProcessState_.n_elem, initProcessState_.n_elem, dataMat_.n_rows+1L);
@@ -138,7 +138,7 @@ void ukfClass::filterSqrtAdditiveNoise(){
 void ukfClass::filterStep(){
   // Scaling constant for unscented transformation
   double gamma = pow(pow(alpha,2.0)*L,0.5);
-  Rcpp::Rcout << "UKF::140 ItCounter " << iterationCounter << "\n";
+  // Rcpp::Rcout << "UKF::140 ItCounter " << iterationCounter << "\n";
   // Generate a set of sigma points from the initial state
   procCovChol.fill(0.0);
   arma::uvec diagNotZeros = arma::find(initProcessCov.diag() != 0);
@@ -146,8 +146,8 @@ void ukfClass::filterStep(){
   procCovChol.submat(diagNotZeros, diagNotZeros) = arma::chol(initProcessCov.submat(diagNotZeros,diagNotZeros), "lower");
   
   // arma::mat stateSigma = generateSigmaPoints(initProcessState, gamma, arma::chol(initProcessCov, "lower"));
-  arma::mat stateSigma = generateSigmaPoints(initProcessState, gamma, procCovChol);
-  
+  arma::mat stateSigma = generateSigmaPoints(initProcessState, gamma, procCovChol, L);
+  // stateSigma.print("UKF::150 stateSigma");
   // Propagate the augmented state through the transition dynamics function
   Rcpp::List statePrediction = predictState(stateSigma, transitionParams);
   
@@ -160,21 +160,21 @@ void ukfClass::filterStep(){
   
   // Calculate the approximation of the average state after non-linear propagation
   nextProcessState = unscentedMean(nextStateSigma, sigmaWts.col(0));
-  
+  // nextProcessState.print("UKF::163 statePred");
   // Calculate the approximation of the variance-covariance matrix of the 
   // state after non-linear propagation, first line only covers state
   // filtering uncertainty
   nextProcessCov = unscentedCov(nextStateSigma, sigmaWts.col(0), sigmaWts.col(1));
   // Add the state noise itself
   nextProcessCov += procNoiseMat;
-  
+  // nextProcessCov.print("UKF::170 procCov");
   // Further extend the state space, see eq. 3.174 and comment in vdM
   diagNotZeros = arma::find(nextProcessCov.diag() != 0);
   procCovChol.fill(0.0);
   procCovChol.submat(diagNotZeros, diagNotZeros) = arma::chol(nextProcessCov.submat(diagNotZeros,diagNotZeros),"lower");
   // arma::mat extendedNextStateSigma = generateSigmaPoints(nextStateSigma, gamma, arma::chol(nextProcessCov,"lower"));
-  arma::mat extendedNextStateSigma = generateSigmaPoints(nextStateSigma, gamma, procCovChol);
-  
+  arma::mat extendedNextStateSigma = generateSigmaPoints(nextStateSigma, gamma, procCovChol, L);
+  // extendedNextStateSigma.print("UKF::177 extendedSigmaState");
   // New unscented transformation weights for bigger state matrix
   arma::mat extendedSigmaWts = generateSigmaWeights(2*L, alpha, beta);
   
@@ -187,14 +187,14 @@ void ukfClass::filterStep(){
   
   // Calculate mean and covariance of observed values via the unscented transformation
   arma::mat observationMean = unscentedMean(observationPrediction, extendedSigmaWts.col(0));
-  observationPrediction.print("UKF::189 obsPred");
+  // observationPrediction.print("UKF::189 obsPred");
   arma::mat observationCov = unscentedCov(observationPrediction, extendedSigmaWts.col(0), extendedSigmaWts.col(1));
-  Rcpp::Rcout << "UKF::191 obsCov rcond" << arma::rcond(observationCov) << "\n";
-  observationCov.print("UKF::192 obsCov");
+  // Rcpp::Rcout << "UKF::191 obsCov rcond" << arma::rcond(observationCov) << "\n";
+  // observationCov.print("UKF::192 obsCov");
   // Add observation noise to covariance matrix
   observationCov += observationNoise;
-  Rcpp::Rcout << "UKF::195 obsCov + obsNoise rcond" << arma::rcond(observationCov) << "\n";
-  Rcpp::Rcout << "UKF::196 obsNoise rcond" << arma::rcond(observationNoise) << "\n";
+  // Rcpp::Rcout << "UKF::195 obsCov + obsNoise rcond" << arma::rcond(observationCov) << "\n";
+  // Rcpp::Rcout << "UKF::196 obsNoise rcond" << arma::rcond(observationNoise) << "\n";
   // Calculate covariance matrix between states and observations
   arma::mat stateObservationCov = unscentedCrossCov(extendedNextStateSigma, observationPrediction, extendedSigmaWts.col(0), extendedSigmaWts.col(1));
   
@@ -233,7 +233,7 @@ void ukfClass::filterSqrtStep(){
   double gamma = pow(pow(alpha,2.0)*L,0.5);
   
   // Generate sigma points
-  arma::mat stateSigma = generateSigmaPoints(initProcessState, gamma, procCovChol);
+  arma::mat stateSigma = generateSigmaPoints(initProcessState, gamma, procCovChol, L);
   
   // Propagate the augmented state through the transition dynamics function
   Rcpp::List statePrediction = predictState(stateSigma, transitionParams);
@@ -276,7 +276,7 @@ void ukfClass::filterSqrtStep(){
   procCovChol.submat(diagNotZeros,diagNotZeros) = procCovCholSmall;
   
   // augment and extend state space
-  arma::mat extendedNextStateSigma = generateSigmaPoints(nextStateSigma, gamma, procCovChol);
+  arma::mat extendedNextStateSigma = generateSigmaPoints(nextStateSigma, gamma, procCovChol, L);
   
   // New unscented transformation weights for bigger state matrix
   arma::mat extendedSigmaWts = generateSigmaWeights(2*L, alpha, beta);
