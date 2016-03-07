@@ -51,8 +51,8 @@ Rcpp::List testUKFclass(){
   
   Rcpp::RNGScope rng_scope_;
   
-  arma::mat driverProcess(100,2,arma::fill::randn);
-  arma::mat obsNoise(100,2,arma::fill::randn);
+  arma::mat driverProcess(1000,2,arma::fill::randn);
+  arma::mat obsNoise(1000,2,arma::fill::randn);
   arma::mat noiseMat;
   noiseMat << 0.15 << -0.025 << arma::endr << -0.025 << 0.05 << arma::endr;
   arma::mat obsNoiseMat;
@@ -114,8 +114,8 @@ Rcpp::List testSqrtUKFclass(){
   
   Rcpp::RNGScope rng_scope_;
   
-  arma::mat driverProcess(100,2,arma::fill::randn);
-  arma::mat obsNoise(100,2,arma::fill::randn);
+  arma::mat driverProcess(3,2,arma::fill::randn);
+  arma::mat obsNoise(3,2,arma::fill::randn);
   arma::mat noiseMat;
   noiseMat << 0.15 << -0.025 << arma::endr << -0.025 << 0.05 << arma::endr;
   arma::mat obsNoiseMat;
