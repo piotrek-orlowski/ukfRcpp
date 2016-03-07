@@ -39,7 +39,7 @@ Rcpp::List testObservation(arma::mat stateVec, Rcpp::List observationParams){
 
 //' @export
 // [[Rcpp::export]]
-Rcpp::List testUKFclass(){
+Rcpp::List testUKFclass(int Nlength){
   
   // Generate objects for filter initialisation. You need a data matrix, initial
   // state, initial state covariance matrix, two handling functions, and a list
@@ -51,8 +51,8 @@ Rcpp::List testUKFclass(){
   
   Rcpp::RNGScope rng_scope_;
   
-  arma::mat driverProcess(1000,2,arma::fill::randn);
-  arma::mat obsNoise(1000,2,arma::fill::randn);
+  arma::mat driverProcess(Nlength,2,arma::fill::randn);
+  arma::mat obsNoise(Nlength,2,arma::fill::randn);
   arma::mat noiseMat;
   noiseMat << 0.15 << -0.025 << arma::endr << -0.025 << 0.05 << arma::endr;
   arma::mat obsNoiseMat;
@@ -102,7 +102,7 @@ Rcpp::List testUKFclass(){
 
 //' @export
 // [[Rcpp::export]]
-Rcpp::List testSqrtUKFclass(){
+Rcpp::List testSqrtUKFclass(int Nlength){
   
   // Generate objects for filter initialisation. You need a data matrix, initial
   // state, initial state covariance matrix, two handling functions, and a list
@@ -114,8 +114,8 @@ Rcpp::List testSqrtUKFclass(){
   
   Rcpp::RNGScope rng_scope_;
   
-  arma::mat driverProcess(3,2,arma::fill::randn);
-  arma::mat obsNoise(3,2,arma::fill::randn);
+  arma::mat driverProcess(Nlength,2,arma::fill::randn);
+  arma::mat obsNoise(Nlength,2,arma::fill::randn);
   arma::mat noiseMat;
   noiseMat << 0.15 << -0.025 << arma::endr << -0.025 << 0.05 << arma::endr;
   arma::mat obsNoiseMat;
