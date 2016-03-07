@@ -1,12 +1,20 @@
 #include <RcppArmadillo.h>
 using namespace std;
 
+//' @name ukfMeanCov
+//' @title Unscented Kalman Filter: Means and Covariances
+//' @description Functions for calculating means and covariances of non-linear transformations of random variables with the use of the Scaled Unscented Transformation.
+//' @param xSigma Numeric matrix. Output from \code{\link{generateSigmaPoints}}: expanded state values.
+//' @param ySigma as above
+//' @param unscWts Numeric vector. Weights for mean calculation. First column from output of \code{\link{generateSigmaWeights}}.
+//' @param unscWtsMean as above
+//' @param unscWtsCov Numeric vector. Weights for covariance calculation. Second column from output of \code{\link{generateSigmaWeights}}.
+//' @return Mean vector or (variance-)covariance matrix.
 //' @export
 //' @useDynLib ukfRcpp
 // [[Rcpp::export]]
 arma::mat unscentedMean(const arma::mat xSigma, const arma::vec unscWts){
-//   xSigma.t().print("unscMean, transpose of xSigma");
-//   unscWts.t().print("unscMean, transpose of unscWts");
+
   arma::mat retMean(xSigma.n_rows,1,arma::fill::zeros);
   
   for(unsigned int xrow = 0; xrow < xSigma.n_rows; xrow++){
@@ -16,6 +24,7 @@ arma::mat unscentedMean(const arma::mat xSigma, const arma::vec unscWts){
   return retMean;
 }
 
+//' @describeIn ukfMeanCov
 //' @export
 // [[Rcpp::export]]
 arma::mat unscentedCov(const arma::mat xSigma, const arma::vec unscWtsMean, const arma::vec unscWtsCov){
@@ -35,6 +44,7 @@ arma::mat unscentedCov(const arma::mat xSigma, const arma::vec unscWtsMean, cons
   
 }
 
+//' @describeIn ukfMeanCov
 //' @export
 // [[Rcpp::export]]
 arma::mat unscentedCrossCov(const arma::mat xSigma, const arma::mat ySigma, const arma::vec unscWtsMean, const arma::vec unscWtsCov){

@@ -37,6 +37,12 @@ Rcpp::List testObservation(arma::mat stateVec, Rcpp::List observationParams){
   
 }
 
+//' @title Filtering application example
+//' @name filtTests
+//' @description These functions are provided as (1) a simple testing ground for the filter, (2) as a demo of how to write the Transition and Observation handler functions.
+//' @param Nlength Integer. Length of generated sample for filtering.
+//' @return List with true and estimated states, and the state covariance matrices.
+//' @details The states follow an AR(1) model with correlated errors. All paramters are hard-coded in this example but can be passed in despective \code{Rcpp::List} objects. The observation equations are signed powers of the states, observed with additional correlated error. \code{testUKFclass} runs the standard-form filter. \code{testSqrtUKFclass} runs the square-root form (better numerical stability).
 //' @export
 // [[Rcpp::export]]
 Rcpp::List testUKFclass(int Nlength){
@@ -99,7 +105,7 @@ Rcpp::List testUKFclass(int Nlength){
   return res;
 }
 
-
+//' @describeIn filtTests
 //' @export
 // [[Rcpp::export]]
 Rcpp::List testSqrtUKFclass(int Nlength){

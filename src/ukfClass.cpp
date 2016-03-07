@@ -4,11 +4,13 @@
 #include "cholupdate.h"
 using namespace std;
 
-// Unscented Kalman Filter with additive noise, van der Merwe pp. 108-110. Rather general implementation.
+// Unscented Kalman Filter with additive noise, van der Merwe pp. 108-110, and the square-root form, pp. 115-116.
 
 // public:
 // Constructor for cpp
 ukfClass::ukfClass(arma::mat dataMat_, arma::vec initProcessState_, arma::mat initProcessCov_, stateHandler predictState_, stateHandler evaluateState_, Rcpp::List modelingParams_) : dataMat(dataMat_), initProcessState(initProcessState_), initProcessCov(initProcessCov_), constInitProcessState(initProcessState_), constInitProcessCov(initProcessCov_), procCovChol(initProcessCov_) {
+  
+  // State dynamics and observation handling functions
   predictState = predictState_;
   evaluateState = evaluateState_;
   
@@ -25,7 +27,6 @@ ukfClass::ukfClass(arma::mat dataMat_, arma::vec initProcessState_, arma::mat in
   observationParams = modelingParams_["observation"];
   
   alpha = 1.0;
-  // L = initProcessState.n_elem;
   L = diagNotZeros.n_elem;
   beta = 2.0;
   
