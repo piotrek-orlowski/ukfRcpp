@@ -3,6 +3,7 @@
 export(cholupdate)
 export(generateSigmaPoints)
 export(generateSigmaWeights)
+export(testSqrtUKFclass)
 export(testUKFclass)
 export(unscentedCov)
 export(unscentedCrossCov)

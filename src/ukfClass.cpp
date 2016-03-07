@@ -250,13 +250,15 @@ using namespace std;
     qrInputSmall.cols(qrInputBig.n_cols, qrInputSmall.n_cols-1) = procNoiseMat.submat(diagNotZeros,diagNotZeros);
     for(int kcol=0; kcol < qrInputBig.n_cols; kcol++){
       qrInputSmall.col(kcol) -= nextProcessState.elem(diagNotZeros);
-      qrInputSmall.col(kcol) *= sqrt(sigmaWts(1,1)); // you have to multiply all elements by the covariance weights with indices greater than one, but these weights are all the same
+      qrInputSmall.col(kcol) *= sqrt(sigmaWts(0,1)); // you have to multiply all elements by the covariance weights with indices greater than one, but these weights are all the same
     }
 
     // do the QR part
-    arma::mat qrQ;
+    arma::mat qrQ, qrR;
     arma::mat procCovCholSmall = procCovChol.submat(diagNotZeros,diagNotZeros);
-    arma::qr(qrQ,procCovCholSmall,qrInputSmall);
+    arma::qr(qrQ,qrR,qrInputSmall);
+    procCovCholSmall = qrR.rows(0,diagNotZeros.n_elem);
+    arma::inplace_trans(procCovCholSmall);
     
     // cholupdate
     arma::uvec zeroInd(1,arma::fill::zeros);
@@ -294,6 +296,7 @@ using namespace std;
     // do the QR part
     arma::mat qrQO;
     arma::qr(qrQO,observationNoise,qrInputObs);
+    arma::inplace_trans(observationNoise);
     
     // cholupdate
     observationNoise = cholupdate(observationNoise, observationPrediction.col(0) - observationMean, extendedSigmaWts(0,1));
@@ -301,8 +304,9 @@ using namespace std;
     // Calculate covariance matrix between states and observations
     arma::mat stateObservationCov = unscentedCrossCov(extendedNextStateSigma, observationPrediction, extendedSigmaWts.col(0), extendedSigmaWts.col(1));
     
-    // Kalman gain
-    arma::mat kalmanGain = arma::solve(arma::solve(observationNoise.t(),stateObservationCov),observationNoise);
+    // Kalman gain arma::solve(Sy.t(),arma::solve(Sy,pxy.t())).t();
+    arma::mat kalmanGain = arma::solve(observationNoise.t(), arma::solve(observationNoise, stateObservationCov.t())).t();
+    // arma::mat kalmanGain = arma::solve(arma::solve(observationNoise.t(),stateObservationCov),observationNoise);
     
     // Pick data point from dataset
     arma::mat dataPoint = dataMat.row(iterationCounter);
