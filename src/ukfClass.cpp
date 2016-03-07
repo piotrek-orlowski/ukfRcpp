@@ -8,7 +8,7 @@ using namespace std;
 
 // public:
 // Constructor for cpp
-  ukfClass::ukfClass(arma::mat dataMat_, arma::vec initProcessState_, arma::mat initProcessCov_, stateHandler predictState_, stateHandler evaluateState_, Rcpp::List modelingParams_) : dataMat(dataMat_), initProcessState(initProcessState_), initProcessCov(initProcessCov_), constInitProcessState(initProcessState_), constInitProcessCov(initProcessCov_) {
+  ukfClass::ukfClass(arma::mat dataMat_, arma::vec initProcessState_, arma::mat initProcessCov_, stateHandler predictState_, stateHandler evaluateState_, Rcpp::List modelingParams_) : dataMat(dataMat_), initProcessState(initProcessState_), initProcessCov(initProcessCov_), constInitProcessState(initProcessState_), constInitProcessCov(initProcessCov_), procCovChol(initProcessCov_) {
     predictState = predictState_;
     evaluateState = evaluateState_;
     
@@ -18,6 +18,7 @@ using namespace std;
     // Some state lags might be propagated. In that case the noise variance for those states is 0, and so is the coefficient on the diagonal of the initial proc covariance matrix
     procCovChol.fill(0.0);
     arma::uvec diagNotZeros = arma::find(initProcessCov.diag() != 0);
+    
     procCovChol.submat(diagNotZeros, diagNotZeros) = arma::chol(initProcessCov.submat(diagNotZeros,diagNotZeros), "lower");
     
     transitionParams = modelingParams_["transition"];
