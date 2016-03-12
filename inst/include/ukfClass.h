@@ -19,7 +19,7 @@ public:
   // return filtered states
   arma::mat getStateMat();
   
-  // return log-likelihood
+  // calculate and return log-likelihood
   arma::vec getLogL();
   
   // set filtering parameters

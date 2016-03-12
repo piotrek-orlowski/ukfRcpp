@@ -100,7 +100,7 @@ Rcpp::List testUKFclass(int Nlength){
   
   myFirstFilter.filterAdditiveNoise();
 
-  res = Rcpp::List::create(Rcpp::Named("trueState") = trueStateMat, Rcpp::Named("observations") = observationsMat, Rcpp::Named("estimState") = myFirstFilter.getStateMat(), Rcpp::Named("stateCovCube") = myFirstFilter.getCovCube()) ;
+  res = Rcpp::List::create(Rcpp::Named("trueState") = trueStateMat, Rcpp::Named("observations") = observationsMat, Rcpp::Named("estimState") = myFirstFilter.getStateMat(), Rcpp::Named("stateCovCube") = myFirstFilter.getCovCube(), Rcpp::Named("logL") = myFirstFilter.getLogL()) ;
   
   return res;
 }
@@ -163,7 +163,7 @@ Rcpp::List testSqrtUKFclass(int Nlength){
   
   myFirstFilter.filterSqrtAdditiveNoise();
   
-  res = Rcpp::List::create(Rcpp::Named("trueState") = trueStateMat, Rcpp::Named("observations") = observationsMat, Rcpp::Named("estimState") = myFirstFilter.getStateMat(), Rcpp::Named("stateCovCube") = myFirstFilter.getCovCube()) ;
+  res = Rcpp::List::create(Rcpp::Named("trueState") = trueStateMat, Rcpp::Named("observations") = observationsMat, Rcpp::Named("estimState") = myFirstFilter.getStateMat(), Rcpp::Named("stateCovCube") = myFirstFilter.getCovCube(), Rcpp::Named("logL") = myFirstFilter.getLogL()) ;
   
   return res;
 }
