@@ -289,7 +289,7 @@ void ukfClass::filterSqrtStep(){
   // Recover predicted observations and their noise covariance matrix
   arma::mat observationPrediction = Rcpp::as<arma::mat>(observationPredictionList["yhat"]);
   arma::mat observationNoise = Rcpp::as<arma::mat>(observationPredictionList["obsNoiseMat"]);
-  observationNoise = arma::chol(observationNoise);
+  observationNoise = arma::chol(observationNoise,"lower");
   
   // Calculate mean and covariance of observed values via the unscented transformation
   arma::mat observationMean = unscentedMean(observationPrediction, extendedSigmaWts.col(0));
