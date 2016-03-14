@@ -234,18 +234,27 @@ void ukfClass::filterSqrtStep(){
   
   // Scaling constant for unscented transformation
   double gamma = pow(pow(alpha,2.0)*L,0.5);
-  
   // Generate sigma points
   arma::mat stateSigma = generateSigmaPoints(initProcessState, gamma, procCovChol, L);
-  
   // Propagate the augmented state through the transition dynamics function
   Rcpp::List statePrediction = predictState(stateSigma, transitionParams);
   
   // Recover augumented propagated state and state noise covariance matrix
   arma::mat nextStateSigma = Rcpp::as<arma::mat>(statePrediction["stateVec"]);
   arma::mat procNoiseMat = Rcpp::as<arma::mat>(statePrediction["procNoiseMat"]);
-  // Rcpp::Rcout << "SQF:: chol of procNoiseMat\n";
-  procNoiseMat.submat(diagNotZeros, diagNotZeros) = arma::chol(procNoiseMat.submat(diagNotZeros, diagNotZeros));
+  arma::mat procNoiseSmall(diagNotZeros.n_elem, diagNotZeros.n_elem);
+  bool decSuccess = arma::chol(procNoiseSmall,procNoiseMat.submat(diagNotZeros, diagNotZeros),"lower");
+  try{
+    if(!decSuccess){
+      procNoiseMat.print("procNoiseMat");
+      throw std::range_error("ukfRcpp::filterSqrtStep: process noise decomposition failed.");
+    }
+  } catch(std::exception &ex) {
+    ::Rf_error("ukfRcpp::filterSqrtStep: process noise decomposition failed.");
+  } catch(...) {
+    ::Rf_error("c++ exception (unknown reason)");
+  }
+  procNoiseMat.submat(diagNotZeros, diagNotZeros) = procNoiseSmall;
   
   // Generate sigma point weights for the original augmented state
   arma::mat sigmaWts = generateSigmaWeights(L, alpha, beta);
@@ -267,7 +276,7 @@ void ukfClass::filterSqrtStep(){
   arma::mat qrQ, qrR;
   arma::mat procCovCholSmall = procCovChol.submat(diagNotZeros,diagNotZeros);
   arma::qr(qrQ,qrR,qrInputSmall.t());
-  procCovCholSmall = qrR.rows(0,diagNotZeros.n_elem-1);
+  procCovCholSmall = qrR.submat(0,0,qrR.n_cols-1,qrR.n_cols-1);
   arma::inplace_trans(procCovCholSmall);
   
   // cholupdate
@@ -285,34 +294,37 @@ void ukfClass::filterSqrtStep(){
   
   // Calculate the observation mapping at predicted points
   Rcpp::List observationPredictionList = evaluateState(extendedNextStateSigma, observationParams);
-  
   // Recover predicted observations and their noise covariance matrix
   arma::mat observationPrediction = Rcpp::as<arma::mat>(observationPredictionList["yhat"]);
   arma::mat observationNoise = Rcpp::as<arma::mat>(observationPredictionList["obsNoiseMat"]);
-  observationNoise = arma::chol(observationNoise,"lower");
-  
+  decSuccess = arma::chol(observationNoise, observationNoise, "lower");
+  try{
+    if(!decSuccess){
+      observationNoise.print("observation noise");
+      throw std::range_error("ukfRcpp::filterSqrtStep: Observation noise decomposition failed.");
+    }
+  } catch(std::exception &ex) {
+    ::Rf_error("ukfRcpp::filterSqrtStep: Observation noise decomposition failed.");
+  } catch(...) {
+    ::Rf_error("c++ exception (unknown reason)");
+  }
   // Calculate mean and covariance of observed values via the unscented transformation
   arma::mat observationMean = unscentedMean(observationPrediction, extendedSigmaWts.col(0));
-  
   // observation covariance -- qr form
   arma::mat qrInputObs(observationPrediction.n_rows, observationPrediction.n_cols-1 + observationNoise.n_cols, arma::fill::zeros);
   qrInputObs.cols(0,observationPrediction.n_cols-2) = observationPrediction.cols(1,observationPrediction.n_cols-1);
   qrInputObs.cols(observationPrediction.n_cols-1,qrInputObs.n_cols-1) = observationNoise;
-  
   for(int kcol=0; kcol < observationPrediction.n_cols-1; kcol++){
     qrInputObs.col(kcol) -= observationMean;
     qrInputObs.col(kcol) *= sqrt(extendedSigmaWts(1,1)); // you have to multiply all elements by the covariance weights with indices greater than one, but these weights are all the same
   }
-  
   // do the QR part
   arma::mat qrQO, qrRO;
   arma::qr(qrQO,qrRO,qrInputObs.t());
   observationNoise = qrRO.submat(0,0,qrRO.n_cols-1, qrRO.n_cols-1);
   arma::inplace_trans(observationNoise);
-  
   // cholupdate
   observationNoise = cholupdate(observationNoise, observationPrediction.col(0) - observationMean, extendedSigmaWts(0,1));
-  
   // Calculate covariance matrix between states and observations
   arma::mat stateObservationCov = unscentedCrossCov(extendedNextStateSigma, observationPrediction, extendedSigmaWts.col(0), extendedSigmaWts.col(1));
   
@@ -327,7 +339,18 @@ void ukfClass::filterSqrtStep(){
   
   // log_likelihood
   logL(iterationCounter) = -0.5*(dataMat.n_cols) * log(2.0*arma::datum::pi) - arma::accu(arma::log(observationNoise.diag()));
-  arma::mat observationNoiseInv = arma::pinv(observationNoise);
+  arma::mat observationNoiseInv;
+  decSuccess = arma::pinv(observationNoiseInv,observationNoise);
+  try{
+    if(!decSuccess){
+      // observationNoise.print("observationNoise for pinv");
+      throw std::range_error("ukfRcpp::filterSqrtStep: partial inverse of obs noise chol failed");
+    }
+  } catch(std::exception &ex) {
+    ::Rf_error("ukfRcpp::filterSqrtStep: partial inverse of obs noise chol failed");
+  } catch(...) {
+    ::Rf_error("c++ exception (unknown reason)");
+  }
   logL(iterationCounter) -= 0.5*arma::as_scalar((dataPoint.t() - observationMean).t() * observationNoiseInv.t() * observationNoiseInv * (dataPoint.t() - observationMean));
   
   // Store state
@@ -350,7 +373,6 @@ void ukfClass::filterSqrtStep(){
   
   // Update state and variance containers for the loop.
   initProcessState = nextProcessState;
-  
   // Move iteration counter forward
   iterationCounter++;
 }
