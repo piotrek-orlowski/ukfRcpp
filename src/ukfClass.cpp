@@ -8,11 +8,12 @@ using namespace std;
 
 // public:
 // Constructor for cpp
-ukfClass::ukfClass(arma::mat dataMat_, arma::vec initProcessState_, arma::mat initProcessCov_, stateHandler predictState_, stateHandler evaluateState_, Rcpp::List modelingParams_) : dataMat(dataMat_), initProcessState(initProcessState_), initProcessCov(initProcessCov_), constInitProcessState(initProcessState_), constInitProcessCov(initProcessCov_), procCovChol(initProcessCov_) {
+ukfClass::ukfClass(arma::mat dataMat_, arma::vec initProcessState_, arma::mat initProcessCov_, stateHandler predictState_, stateHandler evaluateState_, stateControl stateController_, Rcpp::List modelingParams_) : dataMat(dataMat_), initProcessState(initProcessState_), initProcessCov(initProcessCov_), constInitProcessState(initProcessState_), constInitProcessCov(initProcessCov_), procCovChol(initProcessCov_) {
   
   // State dynamics and observation handling functions
   predictState = predictState_;
   evaluateState = evaluateState_;
+  stateController = stateController_;
   
   nextProcessState = initProcessState;
   nextProcessCov = initProcessCov;
@@ -231,7 +232,7 @@ void ukfClass::filterSqrtStep(){
   
   // Estabilsh where to expect zero variances, i.e. no noise
   arma::uvec diagNotZeros = arma::find(initProcessCov.diag() != 0);
-  
+  Rcpp::Rcout << "SQF::234 itCounter" << iterationCounter << "\n";
   // Scaling constant for unscented transformation
   double gamma = pow(pow(alpha,2.0)*L,0.5);
   // Generate sigma points
@@ -243,6 +244,7 @@ void ukfClass::filterSqrtStep(){
   arma::mat nextStateSigma = Rcpp::as<arma::mat>(statePrediction["stateVec"]);
   arma::mat procNoiseMat = Rcpp::as<arma::mat>(statePrediction["procNoiseMat"]);
   arma::mat procNoiseSmall(diagNotZeros.n_elem, diagNotZeros.n_elem);
+  nextStateSigma.print("SQF::246 nextStateSigma");
   bool decSuccess = arma::chol(procNoiseSmall,procNoiseMat.submat(diagNotZeros, diagNotZeros),"lower");
   try{
     if(!decSuccess){
@@ -336,6 +338,7 @@ void ukfClass::filterSqrtStep(){
   
   // Kalman update
   nextProcessState += kalmanGain * (dataPoint.t() - observationMean);
+  nextProcessState = stateController(nextProcessState);
   
   // log_likelihood
   logL(iterationCounter) = -0.5*(dataMat.n_cols) * log(2.0*arma::datum::pi) - arma::accu(arma::log(observationNoise.diag()));

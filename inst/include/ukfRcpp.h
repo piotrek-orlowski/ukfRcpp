@@ -4,5 +4,6 @@
 #include<RcppArmadillo.h>
 
 typedef Rcpp::List (*stateHandler)(const arma::mat, const Rcpp::List);
+typedef arma::mat (*stateControl)(arma::mat);
 
 #endif

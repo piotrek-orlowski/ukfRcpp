@@ -9,7 +9,7 @@ using namespace std;
 class ukfClass {
 public:
   // Constructor for cpp
-  ukfClass(arma::mat dataMat_, arma::vec initProcessState_, arma::mat initProcessCov_, stateHandler predictState_, stateHandler evaluateState_, Rcpp::List modelingParams_);
+  ukfClass(arma::mat dataMat_, arma::vec initProcessState_, arma::mat initProcessCov_, stateHandler predictState_, stateHandler evaluateState_, stateControl stateController_, Rcpp::List modelingParams_);
   // Constructor for R
   ukfClass(arma::mat dataMat_, arma::vec initProcessState_, arma::mat initProcessCov_, SEXP predictState_, SEXP evaluateState_, Rcpp::List modelingParams_);
   // methods:
@@ -35,6 +35,7 @@ public:
   // pointers to functions that handle (1) the conditional mean and variance matrix of the latent process, (2) the mapping from the latent process to the observables
   Rcpp::List (*predictState)(arma::mat, Rcpp::List);
   Rcpp::List (*evaluateState)(arma::mat, Rcpp::List);
+  arma::mat (*stateController)(arma::mat);
   
   // function that runs a step of the filter
   void filterAdditiveNoise();

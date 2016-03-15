@@ -37,6 +37,10 @@ Rcpp::List testObservation(arma::mat stateVec, Rcpp::List observationParams){
   
 }
 
+arma::mat testCheck(arma::mat stateVec){
+  return stateVec;
+}
+
 //' @title Filtering application example
 //' @name filtTests
 //' @description These functions are provided as (1) a simple testing ground for the filter, (2) as a demo of how to write the Transition and Observation handler functions.
@@ -93,10 +97,11 @@ Rcpp::List testUKFclass(int Nlength){
   
   stateHandler transitionPtr = &testTransition;
   stateHandler observationPtr = &testObservation;
+  stateControl controlPtr = &testCheck;
   
   // ukfClass myFirstFilter;
   
-  ukfClass myFirstFilter(observationsMat, initState, initCov, transitionPtr, observationPtr, fakeParameterList);
+  ukfClass myFirstFilter(observationsMat, initState, initCov, transitionPtr, observationPtr, controlPtr, fakeParameterList);
   
   myFirstFilter.filterAdditiveNoise();
 
@@ -156,10 +161,11 @@ Rcpp::List testSqrtUKFclass(int Nlength){
   
   stateHandler transitionPtr = &testTransition;
   stateHandler observationPtr = &testObservation;
+  stateControl controlPtr = &testCheck;
   
   // ukfClass myFirstFilter;
   
-  ukfClass myFirstFilter(observationsMat, initState, initCov, transitionPtr, observationPtr, fakeParameterList);
+  ukfClass myFirstFilter(observationsMat, initState, initCov, transitionPtr, observationPtr, controlPtr, fakeParameterList);
   
   myFirstFilter.filterSqrtAdditiveNoise();
   
