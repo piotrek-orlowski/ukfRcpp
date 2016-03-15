@@ -232,7 +232,7 @@ void ukfClass::filterSqrtStep(){
   
   // Estabilsh where to expect zero variances, i.e. no noise
   arma::uvec diagNotZeros = arma::find(initProcessCov.diag() != 0);
-  Rcpp::Rcout << "SQF::234 itCounter" << iterationCounter << "\n";
+  
   // Scaling constant for unscented transformation
   double gamma = pow(pow(alpha,2.0)*L,0.5);
   // Generate sigma points
@@ -244,7 +244,7 @@ void ukfClass::filterSqrtStep(){
   arma::mat nextStateSigma = Rcpp::as<arma::mat>(statePrediction["stateVec"]);
   arma::mat procNoiseMat = Rcpp::as<arma::mat>(statePrediction["procNoiseMat"]);
   arma::mat procNoiseSmall(diagNotZeros.n_elem, diagNotZeros.n_elem);
-  nextStateSigma.print("SQF::246 nextStateSigma");
+  
   bool decSuccess = arma::chol(procNoiseSmall,procNoiseMat.submat(diagNotZeros, diagNotZeros),"lower");
   try{
     if(!decSuccess){
@@ -346,7 +346,7 @@ void ukfClass::filterSqrtStep(){
   decSuccess = arma::pinv(observationNoiseInv,observationNoise);
   try{
     if(!decSuccess){
-      // observationNoise.print("observationNoise for pinv");
+      observationNoise.print("observationNoise for pinv");
       throw std::range_error("ukfRcpp::filterSqrtStep: partial inverse of obs noise chol failed");
     }
   } catch(std::exception &ex) {
