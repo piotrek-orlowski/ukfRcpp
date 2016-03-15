@@ -37,7 +37,7 @@ Rcpp::List testObservation(arma::mat stateVec, Rcpp::List observationParams){
   
 }
 
-arma::mat testCheck(arma::mat stateVec){
+arma::mat testCheck(arma::mat& stateVec){
   return stateVec;
 }
 
