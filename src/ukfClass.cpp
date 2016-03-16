@@ -269,7 +269,7 @@ void ukfClass::filterSqrtStep(){
   arma::mat qrInputSmall(diagNotZeros.n_elem, qrInputBig.n_cols+diagNotZeros.n_elem,arma::fill::zeros);
   qrInputSmall.cols(0,qrInputBig.n_cols-1) = qrInputBig.rows(diagNotZeros);
   qrInputSmall.cols(qrInputBig.n_cols, qrInputSmall.n_cols-1) = procNoiseMat.submat(diagNotZeros,diagNotZeros);
-  for(int kcol=0; kcol < qrInputBig.n_cols; kcol++){
+  for(unsigned int kcol=0; kcol < qrInputBig.n_cols; kcol++){
     qrInputSmall.col(kcol) -= nextProcessState.elem(diagNotZeros);
     qrInputSmall.col(kcol) *= sqrt(sigmaWts(1,1)); // you have to multiply all elements by the covariance weights with indices greater than one, but these weights are all the same
   }
@@ -316,7 +316,7 @@ void ukfClass::filterSqrtStep(){
   arma::mat qrInputObs(observationPrediction.n_rows, observationPrediction.n_cols-1 + observationNoise.n_cols, arma::fill::zeros);
   qrInputObs.cols(0,observationPrediction.n_cols-2) = observationPrediction.cols(1,observationPrediction.n_cols-1);
   qrInputObs.cols(observationPrediction.n_cols-1,qrInputObs.n_cols-1) = observationNoise;
-  for(int kcol=0; kcol < observationPrediction.n_cols-1; kcol++){
+  for(unsigned int kcol=0; kcol < observationPrediction.n_cols-1; kcol++){
     qrInputObs.col(kcol) -= observationMean;
     qrInputObs.col(kcol) *= sqrt(extendedSigmaWts(1,1)); // you have to multiply all elements by the covariance weights with indices greater than one, but these weights are all the same
   }
@@ -364,7 +364,7 @@ void ukfClass::filterSqrtStep(){
   
   procCovCholSmall = procCovChol.submat(diagNotZeros, diagNotZeros);
   
-  for(int kcol = 0; kcol < UMat.n_cols; kcol++){
+  for(unsigned int kcol = 0; kcol < UMat.n_cols; kcol++){
     arma::vec UMatLoc = UMat.col(kcol);
     procCovCholSmall = cholupdate(procCovCholSmall, UMatLoc.rows(diagNotZeros), -1.0);
   }

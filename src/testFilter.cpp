@@ -82,7 +82,7 @@ Rcpp::List testUKFclass(int Nlength){
   Amat << 0.9 << 0.0 << arma::endr << 0.0 << 0.6 << arma::endr;
   
   arma::mat trueStateMat(driverProcess.n_rows+1,2,arma::fill::zeros);
-  for(int ii=1; ii <= driverProcess.n_rows; ii++){
+  for(unsigned int ii=1; ii <= driverProcess.n_rows; ii++){
     trueStateMat.row(ii) = (Amat * trueStateMat.row(ii-1).t() + driverProcess.row(ii-1).t()).t();
   }
   
@@ -146,7 +146,7 @@ Rcpp::List testSqrtUKFclass(int Nlength){
   Amat << 0.9 << 0.0 << arma::endr << 0.0 << 0.6 << arma::endr;
   
   arma::mat trueStateMat(driverProcess.n_rows+1,2,arma::fill::zeros);
-  for(int ii=1; ii <= driverProcess.n_rows; ii++){
+  for(unsigned int ii=1; ii <= driverProcess.n_rows; ii++){
     trueStateMat.row(ii) = (Amat * trueStateMat.row(ii-1).t() + driverProcess.row(ii-1).t()).t();
   }
   

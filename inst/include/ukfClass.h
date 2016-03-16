@@ -51,12 +51,12 @@ private:
   int sampleSize;
   
   // state containers
-  arma::vec constInitProcessState;
-  arma::mat constInitProcessCov;
   arma::vec initProcessState;
   arma::vec nextProcessState;
   arma::mat initProcessCov;
   arma::mat nextProcessCov;
+  arma::vec constInitProcessState;
+  arma::mat constInitProcessCov;
   arma::mat procCovChol;
   
   // storage
