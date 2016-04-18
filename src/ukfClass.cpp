@@ -151,7 +151,7 @@ void ukfClass::filterStep(){
   arma::mat stateSigma = generateSigmaPoints(initProcessState, gamma, procCovChol, L);
   
   // Propagate the augmented state through the transition dynamics function
-  Rcpp::List statePrediction = predictState(stateSigma, transitionParams);
+  Rcpp::List statePrediction = predictState(stateSigma, transitionParams, iterationCounter);
   
   // Recover augumented propagated state and state noise covariance matrix
   arma::mat nextStateSigma = Rcpp::as<arma::mat>(statePrediction["stateVec"]);
@@ -181,7 +181,7 @@ void ukfClass::filterStep(){
   arma::mat extendedSigmaWts = generateSigmaWeights(2*L, alpha, beta);
   
   // Calculate the observation mapping at predicted points
-  Rcpp::List observationPredictionList = evaluateState(extendedNextStateSigma, observationParams);
+  Rcpp::List observationPredictionList = evaluateState(extendedNextStateSigma, observationParams, iterationCounter);
   
   // Recover predicted observations and their noise covariance matrix
   arma::mat observationPrediction = Rcpp::as<arma::mat>(observationPredictionList["yhat"]);
@@ -225,7 +225,7 @@ void ukfClass::filterStep(){
   initProcessCov = nextProcessCov;
   
   // Move iteration counter forward
-  iterationCounter++;
+  ++iterationCounter;
 }
 
 void ukfClass::filterSqrtStep(){
@@ -238,7 +238,7 @@ void ukfClass::filterSqrtStep(){
   // Generate sigma points
   arma::mat stateSigma = generateSigmaPoints(initProcessState, gamma, procCovChol, L);
   // Propagate the augmented state through the transition dynamics function
-  Rcpp::List statePrediction = predictState(stateSigma, transitionParams);
+  Rcpp::List statePrediction = predictState(stateSigma, transitionParams, iterationCounter);
   
   // Recover augumented propagated state and state noise covariance matrix
   arma::mat nextStateSigma = Rcpp::as<arma::mat>(statePrediction["stateVec"]);
@@ -295,7 +295,7 @@ void ukfClass::filterSqrtStep(){
   arma::mat extendedSigmaWts = generateSigmaWeights(2*L, alpha, beta);
   
   // Calculate the observation mapping at predicted points
-  Rcpp::List observationPredictionList = evaluateState(extendedNextStateSigma, observationParams);
+  Rcpp::List observationPredictionList = evaluateState(extendedNextStateSigma, observationParams, iterationCounter);
   // Recover predicted observations and their noise covariance matrix
   arma::mat observationPrediction = Rcpp::as<arma::mat>(observationPredictionList["yhat"]);
   arma::mat observationNoise = Rcpp::as<arma::mat>(observationPredictionList["obsNoiseMat"]);
@@ -377,7 +377,7 @@ void ukfClass::filterSqrtStep(){
   // Update state and variance containers for the loop.
   initProcessState = nextProcessState;
   // Move iteration counter forward
-  iterationCounter++;
+  ++iterationCounter;
 }
 
 void ukfClass::reinitialiseFilter(){

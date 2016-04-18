@@ -3,7 +3,7 @@
 
 #include<RcppArmadillo.h>
 
-typedef Rcpp::List (*stateHandler)(const arma::mat, const Rcpp::List);
+typedef Rcpp::List (*stateHandler)(const arma::mat&, const Rcpp::List&, const int);
 typedef arma::mat (*stateControl)(arma::mat);
 
 #endif

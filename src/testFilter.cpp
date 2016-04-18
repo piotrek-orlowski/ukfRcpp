@@ -2,7 +2,7 @@
 #include "../inst/include/ukfClass.h"
 using namespace std;
 
-Rcpp::List testTransition(arma::mat stateVec, Rcpp::List transitionParams){
+Rcpp::List testTransition(const arma::mat& stateVec, const Rcpp::List& transitionParams, const int iterCount){
   
   Rcpp::List returnList;
   
@@ -21,7 +21,7 @@ Rcpp::List testTransition(arma::mat stateVec, Rcpp::List transitionParams){
   return returnList;
 }
 
-Rcpp::List testObservation(arma::mat stateVec, Rcpp::List observationParams){
+Rcpp::List testObservation(const arma::mat& stateVec, const Rcpp::List& observationParams, const int iterCount){
   
   Rcpp::List returnList;
   
@@ -88,7 +88,7 @@ Rcpp::List testUKFclass(int Nlength){
   
   Rcpp::List fakeParameterList = Rcpp::List::create(Rcpp::Named("transition") = arma::zeros(1), Rcpp::Named("observation") = arma::zeros(1));
   
-  Rcpp::List observations = testObservation(trueStateMat.rows(1,trueStateMat.n_rows-1), fakeParameterList);
+  Rcpp::List observations = testObservation(trueStateMat.rows(1,trueStateMat.n_rows-1), fakeParameterList, 1L);
   
   arma::mat observationsMat = Rcpp::as<arma::mat>(observations["yhat"]);
   observationsMat += obsNoise;
@@ -152,7 +152,7 @@ Rcpp::List testSqrtUKFclass(int Nlength){
   
   Rcpp::List fakeParameterList = Rcpp::List::create(Rcpp::Named("transition") = arma::zeros(1), Rcpp::Named("observation") = arma::zeros(1));
   
-  Rcpp::List observations = testObservation(trueStateMat.rows(1,trueStateMat.n_rows-1), fakeParameterList);
+  Rcpp::List observations = testObservation(trueStateMat.rows(1,trueStateMat.n_rows-1), fakeParameterList, 1L);
   
   arma::mat observationsMat = Rcpp::as<arma::mat>(observations["yhat"]);
   observationsMat += obsNoise;

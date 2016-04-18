@@ -33,8 +33,8 @@ public:
   arma::mat dataMat;
   
   // pointers to functions that handle (1) the conditional mean and variance matrix of the latent process, (2) the mapping from the latent process to the observables
-  Rcpp::List (*predictState)(arma::mat, Rcpp::List);
-  Rcpp::List (*evaluateState)(arma::mat, Rcpp::List);
+  Rcpp::List (*predictState)(const arma::mat&, const Rcpp::List&, const int);
+  Rcpp::List (*evaluateState)(const arma::mat&, const Rcpp::List&, const int);
   arma::mat (*stateController)(arma::mat);
   
   // function that runs a step of the filter
