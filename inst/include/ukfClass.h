@@ -22,6 +22,10 @@ public:
   // calculate and return log-likelihood
   arma::vec getLogL();
   
+  arma::mat getPredMat();
+  
+  arma::mat getFitMat();
+  
   // set filtering parameters
   void setUKFconstants(arma::vec);
   
@@ -63,6 +67,8 @@ private:
   arma::cube stateCovCube;
   arma::mat stateMat;
   arma::vec logL;
+  arma::mat predMat;
+  arma::mat fitMat;
   
   // model parameters (these will be big matrices, let's keep them hidden)
   Rcpp::List transitionParams;

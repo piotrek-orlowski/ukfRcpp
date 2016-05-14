@@ -1,4 +1,5 @@
 #include <RcppArmadillo.h>
+#include <fstream>
 #include "../inst/include/ukfClass.h"
 #include "../inst/include/unscentedMeanCov.h"
 #include "cholupdate.h"
@@ -41,6 +42,8 @@ ukfClass::ukfClass(arma::mat dataMat_, arma::vec initProcessState_, arma::mat in
   sampleSize = dataMat.n_rows;
   
   logL = arma::zeros<arma::vec>(dataMat.n_rows);
+  predMat = arma::zeros<arma::mat>(dataMat.n_rows, dataMat.n_cols);
+  fitMat = arma::zeros<arma::mat>(dataMat.n_rows, dataMat.n_cols);
 }
 
 // Constructor for R
@@ -94,6 +97,15 @@ arma::mat ukfClass::getStateMat(){
 arma::vec ukfClass::getLogL(){
   return logL;
 }
+
+arma::mat ukfClass::getPredMat(){
+  return predMat;
+}
+
+arma::mat ukfClass::getFitMat(){
+  return fitMat;
+}
+
 
 // set filtering parameters
 void ukfClass::setUKFconstants(arma::vec alphaBeta){
@@ -354,10 +366,14 @@ void ukfClass::filterSqrtStep(){
   } catch(...) {
     ::Rf_error("c++ exception (unknown reason)");
   }
+  
   logL(iterationCounter) -= 0.5*arma::as_scalar((dataPoint.t() - observationMean).t() * observationNoiseInv.t() * observationNoiseInv * (dataPoint.t() - observationMean));
   
   // Store state
   stateMat.row(iterationCounter+1L) = nextProcessState.t();
+  
+  // store obsMean
+  predMat.row(iterationCounter) = observationMean.t();
   
   // new process obs matrix
   arma::mat UMat = kalmanGain * observationNoise;
