@@ -65,7 +65,7 @@ Finally, the `checkState` function takes the state matrix as an argument and ret
 
 # Using as a shared library
 
-If you use ukfRcpp for multiple projects, the most convenient setup is one where you link your `R` packages dynamically. In order to do that, your `R` packages `src/Makevars` or `src/Makevars.win` files have to contain explicit linking information. If you're running a 64-bit Windows box, and assuming that your `R` packages are installed to `c:/path/to/Rlibs`, this amounts to providing the following flags in the `src/Makevars.win` file:
+If you use ukfRcpp for multiple projects, the most convenient setup is one where you link your `R` packages dynamically. In order to do that, your `R` package's `src/Makevars` or `src/Makevars.win` files have to contain explicit linking information. If you're running a 64-bit Windows box, and assuming that your `R` packages are installed to `c:/path/to/Rlibs`, this amounts to providing the following flags in the `src/Makevars.win` file:
 
 ```
 PKG_LIBS = $(shell $(R_HOME)/bin/Rscript.exe -e "Rcpp:::LdFlags()") $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) -Lc:/path/to/Rlibs/ukfRcpp/libs/x64 -lukfRcpp
