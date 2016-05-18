@@ -11,6 +11,9 @@ The package has been tested to compile on Linux and Windows machines. To install
 library(devtools)
 install_github(repo = "piotrek-orlowski/ukfRcpp")
 ```
+# When to use it?
+
+The package is designed for using in scenarios when it is complicated to calculate the transition/observation parameters given a set of parameters of the underlying mathematical model. For example, in Stochastic Volatility models in finance applied to option pricing, the underlying model parameters are used to calculate: (1) the coefficients for evaluating the moments of the conditional state transition density, and (2) the coefficients for evaluating option prices given the current state. The use scenario is thus to write a program handling coefficient calculation and use them as parameters in the possibly non-linear transformations, plugged into the UKF via `predictState` and `evaluateState` functions described below.
 
 # How to use it?
 
@@ -56,4 +59,8 @@ Rcpp::List my_sqrtFilter(const arma::mat dataMat, const arma:vec initState, cons
 }
 ```
 
-The file https://github.com/piotrek-orlowski/ukfRcpp/blob/master/src/testFilter.cpp provides an example. This file compiles alongside the package and exposes to the user the `testUKFclass` function.
+The file https://github.com/piotrek-orlowski/ukfRcpp/blob/master/src/testFilter.cpp provides an example. This file compiles alongside the package and exposes to the user the `testUKFclass` function. The function simulates a simple two-state VAR, generates noisy non-linear observations, initializes and runs the filter, and finally returns true and filtered states, and noisy observations alongside a Gaussian likelihood.
+
+# Author
+
+The package is being developed by Piotr Orłowski
