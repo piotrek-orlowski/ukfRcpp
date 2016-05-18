@@ -23,8 +23,8 @@ vignettes/*.pdf
 .httr-oauth
 
 # Rcpp automatically generated files
-R/RcppExports.R
-src/RcppExports.cpp
+#R/RcppExports.R
+#src/RcppExports.cpp
 src/*.o
 
 # Compiled library files
