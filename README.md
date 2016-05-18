@@ -61,6 +61,17 @@ Rcpp::List my_sqrtFilter(const arma::mat dataMat, const arma:vec initState, cons
 
 The file https://github.com/piotrek-orlowski/ukfRcpp/blob/master/src/testFilter.cpp provides an example. This file compiles alongside the package and exposes to the user the `testUKFclass` function. The function simulates a simple two-state VAR, generates noisy non-linear observations, initializes and runs the filter, and finally returns true and filtered states, and noisy observations alongside a Gaussian likelihood.
 
+# Using as a shared library
+
+If you use ukfRcpp for multiple projects, the most convenient setup is one where you link your `R` packages dynamically. In order to do that, your `R` packages `src/Makevars` or `src/Makevars.win` files have to contain explicit linking information. If you're running a 64-bit Windows box, and assuming that your `R` packages are installed to `c:/path/to/Rlibs`, this amounts to providing the following flags in the `src/Makevars.win` file:
+
+```
+PKG_LIBS = $(shell $(R_HOME)/bin/Rscript.exe -e "Rcpp:::LdFlags()") $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS) -Lc:/path/to/Rlibs/ukfRcpp/libs/x64 -lukfRcpp
+PKG_CXXFLAGS = -Ic:/path/to/Rlibs/ukfRcpp/include
+```
+
+If you use RStudio, providing these flags will also allow RStudio to help with code completion from the `ukfRcpp` code.
+
 # Author
 
 The package is being developed by Piotr Orłowski
