@@ -43,7 +43,7 @@ Rcpp::List my_sqrtFilter(const arma::mat dataMat, const arma:vec initState, cons
   
   stateHandler transitionPtr = &predictState;
   stateHandler observationPtr = &evaluateState;
-  stateControl controlPtr = &testCheck;
+  stateControl controlPtr = &checkState;
   
   // Initialize ukfClass object
   ukfClass myFirstFilter(dataMat, initState, initProcCov, transitionPtr, observationPtr, controlPtr, modelParams);
@@ -60,6 +60,8 @@ Rcpp::List my_sqrtFilter(const arma::mat dataMat, const arma:vec initState, cons
 ```
 
 The file https://github.com/piotrek-orlowski/ukfRcpp/blob/master/src/testFilter.cpp provides an example. This file compiles alongside the package and exposes to the user the `testUKFclass` function. The function simulates a simple two-state VAR, generates noisy non-linear observations, initializes and runs the filter, and finally returns true and filtered states, and noisy observations alongside a Gaussian likelihood.
+
+Finally, the `checkState` function takes the state matrix as an argument and returns a matrix of the same size. This function is contained for checking state admissibility: preventing numerical failure if, for example, a negative sigma-point is generated in a model with strictly positive states, or a Kalman update results in negative filtered values.
 
 # Using as a shared library
 
