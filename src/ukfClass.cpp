@@ -46,42 +46,6 @@ ukfClass::ukfClass(arma::mat dataMat_, arma::vec initProcessState_, arma::mat in
   fitMat = arma::zeros<arma::mat>(dataMat.n_rows, dataMat.n_cols);
 }
 
-// Constructor for R
-ukfClass::ukfClass(arma::mat dataMat_, arma::vec initProcessState_, arma::mat initProcessCov_, SEXP predictState_, SEXP evaluateState_, Rcpp::List modelingParams_) : dataMat(dataMat_), initProcessState(initProcessState_), initProcessCov(initProcessCov_), constInitProcessState(initProcessState_), constInitProcessCov(initProcessCov_) {
-  
-  Rcpp::XPtr<stateHandler> predictStateXptr(predictState_);
-  predictState = *predictStateXptr;
-  
-  Rcpp::XPtr<stateHandler> evaluateStateXptr(evaluateState_);
-  evaluateState = *evaluateStateXptr;
-  
-  // predictState = predictState_;
-  // evaluateState = evaluateState_;
-  
-  nextProcessState = initProcessState;
-  nextProcessCov = initProcessCov;
-  
-  // Some state lags might be propagated. In that case the noise variance for those states is 0, and so is the coefficient on the diagonal of the initial proc covariance matrix
-  procCovChol.fill(0.0);
-  arma::uvec diagNotZeros = arma::find(initProcessCov.diag() != 0);
-  procCovChol.submat(diagNotZeros, diagNotZeros) = arma::chol(initProcessCov.submat(diagNotZeros,diagNotZeros), "lower");
-  
-  transitionParams = modelingParams_["transition"];
-  observationParams = modelingParams_["observation"];
-  
-  alpha = 0.25;
-  L = initProcessState.n_elem;
-  beta = 2.0;
-  
-  stateCovCube = arma::zeros<arma::cube>(initProcessState_.n_elem, initProcessState_.n_elem, dataMat_.n_rows+1L);
-  stateMat = arma::zeros<arma::mat>(dataMat_.n_rows+1L, initProcessState_.n_elem);
-  
-  stateMat.row(0) = initProcessState.t();
-  stateCovCube.slice(0) = initProcessCov;
-  sampleSize = dataMat.n_rows;
-  iterationCounter = 0;
-}
-
 // methods:
 // return covariance matrices of filtered states
 arma::cube ukfClass::getCovCube(){
@@ -399,24 +363,4 @@ void ukfClass::filterSqrtStep(){
 void ukfClass::reinitialiseFilter(){
   initProcessState = constInitProcessState;
   initProcessCov = constInitProcessCov;
-}
-
-RCPP_MODULE(ukf){
-  
-  Rcpp::class_<ukfClass>("ukf")
-  
-  // Expose R constructor
-  .constructor<arma::mat, arma::vec, arma::mat, SEXP, SEXP, Rcpp::List>()
-  
-  // Expose methods
-  .property("stateCovCube", &ukfClass::getCovCube, "Retrieve state covariance cube.")
-  .property("stateMat", &ukfClass::getStateMat, "Retrieve filtered states.")
-  .property("logL", &ukfClass::getLogL, "Retrieve log-likelihood vector.")
-  .property("ukfConst", &ukfClass::getUKFconstants, &ukfClass::setUKFconstants, "UKF parameters alpha (first) and beta (second) argument/element of returned vector.")
-  .method("filterAdditiveNoise", &ukfClass::filterAdditiveNoise, "Run filter on the sample.")
-  .method("reinitialiseFilter", &ukfClass::reinitialiseFilter, "Reinitialise all containers and counters to at-construction state.")
-  
-  // Expose fields
-  .field( "dataMat", &ukfClass::dataMat)
-  ;
 }

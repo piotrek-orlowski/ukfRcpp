@@ -10,8 +10,7 @@ class ukfClass {
 public:
   // Constructor for cpp
   ukfClass(arma::mat dataMat_, arma::vec initProcessState_, arma::mat initProcessCov_, stateHandler predictState_, stateHandler evaluateState_, stateControl stateController_, Rcpp::List modelingParams_);
-  // Constructor for R
-  ukfClass(arma::mat dataMat_, arma::vec initProcessState_, arma::mat initProcessCov_, SEXP predictState_, SEXP evaluateState_, Rcpp::List modelingParams_);
+  
   // methods:
   // return covariance matrices of filtered states
   arma::cube getCovCube();
