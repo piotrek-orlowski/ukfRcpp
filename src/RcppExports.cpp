@@ -69,6 +69,23 @@ BEGIN_RCPP
     return __result;
 END_RCPP
 }
+// unscentedKalmanFilter
+List unscentedKalmanFilter(const arma::mat dataMat, const arma::vec initState, const arma::mat initProcCov, const List modelParams, SEXP predict_XPtr, SEXP evaluate_XPtr, SEXP control_XPtr);
+RcppExport SEXP ukfRcpp_unscentedKalmanFilter(SEXP dataMatSEXP, SEXP initStateSEXP, SEXP initProcCovSEXP, SEXP modelParamsSEXP, SEXP predict_XPtrSEXP, SEXP evaluate_XPtrSEXP, SEXP control_XPtrSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject __result;
+    Rcpp::RNGScope __rngScope;
+    Rcpp::traits::input_parameter< const arma::mat >::type dataMat(dataMatSEXP);
+    Rcpp::traits::input_parameter< const arma::vec >::type initState(initStateSEXP);
+    Rcpp::traits::input_parameter< const arma::mat >::type initProcCov(initProcCovSEXP);
+    Rcpp::traits::input_parameter< const List >::type modelParams(modelParamsSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type predict_XPtr(predict_XPtrSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type evaluate_XPtr(evaluate_XPtrSEXP);
+    Rcpp::traits::input_parameter< SEXP >::type control_XPtr(control_XPtrSEXP);
+    __result = Rcpp::wrap(unscentedKalmanFilter(dataMat, initState, initProcCov, modelParams, predict_XPtr, evaluate_XPtr, control_XPtr));
+    return __result;
+END_RCPP
+}
 // unscentedMean
 arma::mat unscentedMean(const arma::mat xSigma, const arma::vec unscWts);
 RcppExport SEXP ukfRcpp_unscentedMean(SEXP xSigmaSEXP, SEXP unscWtsSEXP) {

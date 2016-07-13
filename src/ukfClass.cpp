@@ -354,6 +354,10 @@ void ukfClass::filterSqrtStep(){
   // Store state covariance matrix
   stateCovCube.slice(iterationCounter+1L) = procCovChol;
   
+  // Calculate fitted values
+  Rcpp::List fitted = evaluateState(nextProcessState, observationParams, iterationCounter);
+  fitMat.row(iterationCounter) = Rcpp::as<arma::mat>(fitted["yhat"]).t();
+  
   // Update state and variance containers for the loop.
   initProcessState = nextProcessState;
   // Move iteration counter forward

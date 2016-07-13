@@ -52,6 +52,43 @@ testSqrtUKFclass <- function(Nlength) {
     .Call('ukfRcpp_testSqrtUKFclass', PACKAGE = 'ukfRcpp', Nlength)
 }
 
+#' @name unscentedKalmanFilter
+#' @title Unscented Kalman Filter
+#' @description This function accepts pointers to compiled c++ evaluator 
+#'   functions for the observation equations and the transition equations, plus
+#'   data and parameters, and evaluates the UKF.
+#' @param dataMat matrix containing observed data, by-column
+#' @param initState initial state vector values
+#' @param initProcCov initial variance-covariance matrix of the state vector
+#' @param modelParams \code{list} of model parameter objects, compatible with 
+#'   your \code{predictState} and \code{evaluateState} functions, and with the 
+#'   specification of the \code{ukfClass}
+#' @param predict_Xptr \code{XPtr} to \code{predictState} function which 
+#'   handles your one-step head prediction of the state variable, given current
+#'   values.
+#' @param evaluate_XPtr \code{XPtr} to \code{evaluateState} function which 
+#'   calculates the values of the measurement equation given values of the 
+#'   state.
+#' @param control_XPtr \code{XPtr} to \code{stateController} function which 
+#'   handles pathological state cases after the filtering step (e.g. when using
+#'   a Gaussian filter on strictly positive variables, which turn negative 
+#'   after the filtering step, it is useful to set them to a small value)
+#' @return \code{List} with the following fields: \code{estimState} \code{(T+1)
+#'   x N} matrix of filtered states, with the initial state vector in the first
+#'   row; \code{stateCovCube} 3-dimensional array of posterior state 
+#'   variance-covariance matrices, \code{N x N x T}; \code{logL} vector of 
+#'   Gaussian likelihood values, see e.g. "Time Series Analysis" by J.D. 
+#'   Hamilton, \code{predMat} \code{T x M} matrix of predictions of 
+#'   observations at time \code{t} given observations at time \code{t-1}, 
+#'   \code{fitMat} \code{T x M} matrix of observation equations evaluated at
+#'   filtered state values.
+#' @export
+NULL
+
+unscentedKalmanFilter <- function(dataMat, initState, initProcCov, modelParams, predict_XPtr, evaluate_XPtr, control_XPtr) {
+    .Call('ukfRcpp_unscentedKalmanFilter', PACKAGE = 'ukfRcpp', dataMat, initState, initProcCov, modelParams, predict_XPtr, evaluate_XPtr, control_XPtr)
+}
+
 #' @name ukfMeanCov
 #' @title Unscented Kalman Filter: Means and Covariances
 #' @description Functions for calculating means and covariances of non-linear transformations of random variables with the use of the Scaled Unscented Transformation.
