@@ -307,8 +307,31 @@ void ukfClass::filterSqrtStep(){
   arma::mat stateObservationCov = unscentedCrossCov(extendedNextStateSigma, observationPrediction, extendedSigmaWts.col(0), extendedSigmaWts.col(1));
   
   // Kalman gain arma::solve(Sy.t(),arma::solve(Sy,pxy.t())).t();
-  arma::mat kalmanGain = arma::solve(observationNoise.t(), arma::solve(observationNoise, stateObservationCov.t())).t();
-  
+  arma::mat kalmanGainComponent;
+  decSuccess = arma::solve(kalmanGainComponent, observationNoise, stateObservationCov.t() );
+  try{
+    if(!decSuccess){
+      observationNoise.print("observation noise");
+      throw std::range_error("ukfRcpp::filterSqrtStep: kalmanGainComponent failed.");
+    }
+  } catch(std::exception &ex) {
+    ::Rf_error("ukfRcpp::filterSqrtStep: kalmanGainComponent failed.");
+  } catch(...) {
+    ::Rf_error("c++ exception (unknown reason)");
+  }
+  arma::mat kalmanGain;
+  decSuccess = arma::solve(kalmanGain, observationNoise.t(), kalmanGainComponent);
+  arma::inplace_trans(kalmanGain);
+  try{
+    if(!decSuccess){
+      observationNoise.print("observation noise");
+      throw std::range_error("ukfRcpp::filterSqrtStep: kalmanGain failed.");
+    }
+  } catch(std::exception &ex) {
+    ::Rf_error("ukfRcpp::filterSqrtStep: kalmanGain failed.");
+  } catch(...) {
+    ::Rf_error("c++ exception (unknown reason)");
+  }
   // Pick data point from dataset
   arma::mat dataPoint = dataMat.row(iterationCounter);
   
