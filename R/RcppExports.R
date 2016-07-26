@@ -26,7 +26,7 @@ generateSigmaPoints <- function(xMat, gam, PMatChol, L) {
     .Call('ukfRcpp_generateSigmaPoints', PACKAGE = 'ukfRcpp', xMat, gam, PMatChol, L)
 }
 
-#' @describeIn ukfPtsWts
+#' @rdname ukfPtsWts
 #' @param alpha Numeric in \code{[0,1]}: size of step in the Scaled Uncented Transformation.
 #' @param beta Numeric. Corrections in weights for calculating higher moments. Set to \code{0} unless you know what you're doing.
 #' @return Matrix of size \code{(2*L+1) x 2}. First column contains weights for the calculation of the non-linearly transformed mean; second column -- for the variance-covariance matrix.
@@ -46,7 +46,7 @@ testUKFclass <- function(Nlength) {
     .Call('ukfRcpp_testUKFclass', PACKAGE = 'ukfRcpp', Nlength)
 }
 
-#' @describeIn filtTests
+#' @rdname filtTests
 #' @export
 testSqrtUKFclass <- function(Nlength) {
     .Call('ukfRcpp_testSqrtUKFclass', PACKAGE = 'ukfRcpp', Nlength)
@@ -104,13 +104,13 @@ unscentedMean <- function(xSigma, unscWts) {
     .Call('ukfRcpp_unscentedMean', PACKAGE = 'ukfRcpp', xSigma, unscWts)
 }
 
-#' @describeIn ukfMeanCov
+#' @rdname ukfMeanCov
 #' @export
 unscentedCov <- function(xSigma, unscWtsMean, unscWtsCov) {
     .Call('ukfRcpp_unscentedCov', PACKAGE = 'ukfRcpp', xSigma, unscWtsMean, unscWtsCov)
 }
 
-#' @describeIn ukfMeanCov
+#' @rdname ukfMeanCov
 #' @export
 unscentedCrossCov <- function(xSigma, ySigma, unscWtsMean, unscWtsCov) {
     .Call('ukfRcpp_unscentedCrossCov', PACKAGE = 'ukfRcpp', xSigma, ySigma, unscWtsMean, unscWtsCov)

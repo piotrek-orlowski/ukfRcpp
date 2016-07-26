@@ -5,8 +5,13 @@ Version: 0.0.1
 Date: 2016-02-24
 Author: Piotr Or{\l}owski
 Maintainer: Piotr Or{\l}owski <piotrek.orlowski@gmail.com>
-Description: Quick and dirty implementation of the Unscented Kalman Filter with Additive Noise for State Estimation, see algorithm in pp. 108-109 of 'Sigma-Point Kalman Filters for Probabilistic Inference in Dynamic State-Space Models', R. van der Merwe, PhD Thesis, U of Stellenbosch
+Description: Quick and dirty implementation of the Unscented Kalman Filter with
+    Additive Noise for State Estimation, see algorithm in pp. 108-109 of 'Sigma-
+    Point Kalman Filters for Probabilistic Inference in Dynamic State-Space Models',
+    R. van der Merwe, PhD Thesis, U of Stellenbosch
 License: GPL > 2.0
-Depends: Rcpp (>= 0.12.3),
-         RcppArmadillo
+Depends:
+    Rcpp (>= 0.12.3),
+    RcppArmadillo
 LinkingTo: Rcpp, RcppArmadillo
+RoxygenNote: 5.0.1

@@ -110,7 +110,7 @@ Rcpp::List testUKFclass(int Nlength){
   return res;
 }
 
-//' @describeIn filtTests
+//' @rdname filtTests
 //' @export
 // [[Rcpp::export]]
 Rcpp::List testSqrtUKFclass(int Nlength){

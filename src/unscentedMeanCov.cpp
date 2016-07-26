@@ -24,7 +24,7 @@ arma::mat unscentedMean(const arma::mat xSigma, const arma::vec unscWts){
   return retMean;
 }
 
-//' @describeIn ukfMeanCov
+//' @rdname ukfMeanCov
 //' @export
 // [[Rcpp::export]]
 arma::mat unscentedCov(const arma::mat xSigma, const arma::vec unscWtsMean, const arma::vec unscWtsCov){
@@ -44,7 +44,7 @@ arma::mat unscentedCov(const arma::mat xSigma, const arma::vec unscWtsMean, cons
   
 }
 
-//' @describeIn ukfMeanCov
+//' @rdname ukfMeanCov
 //' @export
 // [[Rcpp::export]]
 arma::mat unscentedCrossCov(const arma::mat xSigma, const arma::mat ySigma, const arma::vec unscWtsMean, const arma::vec unscWtsCov){

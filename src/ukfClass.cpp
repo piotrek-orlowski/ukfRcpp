@@ -308,7 +308,7 @@ void ukfClass::filterSqrtStep(){
   
   // Kalman gain arma::solve(Sy.t(),arma::solve(Sy,pxy.t())).t();
   arma::mat kalmanGainComponent;
-  decSuccess = arma::solve(kalmanGainComponent, observationNoise, stateObservationCov.t() );
+  decSuccess = arma::solve(kalmanGainComponent, arma::trimatl(observationNoise), stateObservationCov.t() );
   try{
     if(!decSuccess){
       observationNoise.print("observation noise");
@@ -320,7 +320,7 @@ void ukfClass::filterSqrtStep(){
     ::Rf_error("c++ exception (unknown reason)");
   }
   arma::mat kalmanGain;
-  decSuccess = arma::solve(kalmanGain, observationNoise.t(), kalmanGainComponent);
+  decSuccess = arma::solve(kalmanGain, arma::trimatu(observationNoise.t()), kalmanGainComponent);
   arma::inplace_trans(kalmanGain);
   try{
     if(!decSuccess){
