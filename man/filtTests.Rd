@@ -2,8 +2,8 @@
 % Please edit documentation in R/RcppExports.R
 \name{filtTests}
 \alias{filtTests}
-\alias{testSqrtUKFclass}
 \alias{testUKFclass}
+\alias{testSqrtUKFclass}
 \title{Filtering application example}
 \usage{
 testUKFclass(Nlength)
@@ -22,4 +22,3 @@ These functions are provided as (1) a simple testing ground for the filter, (2) 
 \details{
 The states follow an AR(1) model with correlated errors. All paramters are hard-coded in this example but can be passed in despective \code{Rcpp::List} objects. The observation equations are signed powers of the states, observed with additional correlated error. \code{testUKFclass} runs the standard-form filter. \code{testSqrtUKFclass} runs the square-root form (better numerical stability).
 }
-

@@ -19,4 +19,3 @@ Let RMat be the lower triangular Cholesky factor of PMat. This function calculat
 \details{
 This follows the definition in van der Merwe PhD Thesis ``Sigma-Point Kalma Filters for Probabilistic Inference in Dynamic State-Space Models''
 }
-

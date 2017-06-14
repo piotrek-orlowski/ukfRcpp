@@ -186,6 +186,13 @@ void ukfClass::filterStep(){
   // Store state
   stateMat.row(iterationCounter+1L) = nextProcessState.t();
   
+  // store obsMean
+  predMat.row(iterationCounter) = observationMean.t();
+  
+  // Calculate fitted values
+  Rcpp::List fitted = evaluateState(nextProcessState, observationParams, iterationCounter);
+  fitMat.row(iterationCounter) = Rcpp::as<arma::mat>(fitted["yhat"]).t();
+  
   // log_likelihood
   logL(iterationCounter) = -1.0*(dataMat.n_cols)/2.0 * log(2.0*arma::datum::pi) - 0.5 * log(arma::det(observationCov));
   logL(iterationCounter) -= 0.5*arma::as_scalar((dataPoint.t() - observationMean).t() * arma::inv_sympd(observationCov) * (dataPoint.t() - observationMean));

@@ -43,4 +43,3 @@ This function accepts pointers to compiled c++ evaluator
   functions for the observation equations and the transition equations, plus
   data and parameters, and evaluates the UKF.
 }
-

@@ -2,9 +2,9 @@
 % Please edit documentation in R/RcppExports.R
 \name{ukfMeanCov}
 \alias{ukfMeanCov}
+\alias{unscentedMean}
 \alias{unscentedCov}
 \alias{unscentedCrossCov}
-\alias{unscentedMean}
 \title{Unscented Kalman Filter: Means and Covariances}
 \usage{
 unscentedMean(xSigma, unscWts)
@@ -30,4 +30,3 @@ Mean vector or (variance-)covariance matrix.
 \description{
 Functions for calculating means and covariances of non-linear transformations of random variables with the use of the Scaled Unscented Transformation.
 }
-
