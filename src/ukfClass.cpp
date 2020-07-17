@@ -215,7 +215,6 @@ void ukfClass::filterSqrtStep(){
   
   // Estabilsh where to expect zero variances, i.e. no noise
   arma::uvec diagNotZeros = arma::find(initProcessCov.diag() != 0);
-  
   // Scaling constant for unscented transformation
   double gamma = pow(pow(alpha,2.0)*L,0.5);
   // Generate sigma points
